@@ -70,3 +70,92 @@ var list1 = {
         }
     ]
 };
+
+var list2 = {
+    _id: ObjectId(),
+    name: "Вечеринка",
+    description: "На день рождения",
+    createdBy: user2._id,
+    createdAt: new Date("2025-02-20"),
+    items: [
+        {
+            itemId: "item_004",
+            name: "Пицца",
+            quantity: 3,
+            unit: "шт",
+            category: "Готовая еда",
+            status: 0,
+            addedBy: user2._id,
+            addedAt: new Date("2025-02-20"),
+            lastUpdatedBy: user2._id,
+            lastUpdatedAt: new Date("2025-02-20"),
+            comments: []
+        },
+        {
+            itemId: "item_005",
+            name: "Кока-кола",
+            quantity: 2,
+            unit: "л",
+            category: "Напитки",
+            status: 0,
+            addedBy: user3._id,
+            addedAt: new Date("2025-02-21"),
+            lastUpdatedBy: user3._id,
+            lastUpdatedAt: new Date("2025-02-21"),
+            comments: [
+                {
+                    commentId: "comm_002",
+                    text: "Лучше взять Zero",
+                    authorId: user2._id,
+                    createdAt: new Date("2025-02-21")
+                }
+            ]
+        },
+        {
+            itemId: "item_006",
+            name: "Чипсы",
+            quantity: 2,
+            unit: "пачки",
+            category: "Снеки",
+            status: 1,
+            addedBy: user2._id,
+            addedAt: new Date("2025-02-20"),
+            lastUpdatedBy: user4._id,
+            lastUpdatedAt: new Date("2025-02-22"),
+            comments: []
+        },
+        {
+            itemId: "item_007",
+            name: "Торт",
+            quantity: 1,
+            unit: "шт",
+            category: "Десерты",
+            status: 0,
+            addedBy: user2._id,
+            addedAt: new Date("2025-02-20"),
+            lastUpdatedBy: user2._id,
+            lastUpdatedAt: new Date("2025-02-20"),
+            comments: [
+                {
+                    commentId: "comm_003",
+                    text: "С шоколадом, пожалуйста",
+                    authorId: user3._id,
+                    createdAt: new Date("2025-02-21")
+                }
+            ]
+        },
+        {
+            itemId: "item_008",
+            name: "Сок апельсиновый",
+            quantity: 1.5,
+            unit: "л",
+            category: "Напитки",
+            status: 0,
+            addedBy: user4._id,
+            addedAt: new Date("2025-02-22"),
+            lastUpdatedBy: user4._id,
+            lastUpdatedAt: new Date("2025-02-22"),
+            comments: []
+        }
+    ]
+};
