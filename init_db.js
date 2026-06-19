@@ -328,3 +328,11 @@ db.permissions.createIndex({ listId: 1 });
 db.permissions.createIndex({ userId: 1 });
 
 print("Индексы созданы");
+
+print("=========================================");
+print("База данных 'ShoppingListOrganizer' успешно создана!");
+print("Статистика:");
+print(" - Пользователей: " + db.users.count());
+print(" - Списков покупок: " + db.shoppingLists.count());
+print(" - Записей прав доступа: " + db.permissions.count());
+print("=========================================");
