@@ -202,3 +202,46 @@ var list3 = {
         }
     ]
 };
+
+var list4 = {
+    _id: ObjectId(),
+    name: "Дача",
+    description: "Для сада и огорода",
+    createdBy: user4._id,
+    createdAt: new Date("2025-03-01"),
+    items: [
+        {
+            itemId: "item_011",
+            name: "Семена помидоров",
+            quantity: 3,
+            unit: "пачки",
+            category: "Сад",
+            status: 0,
+            addedBy: user4._id,
+            addedAt: new Date("2025-03-01"),
+            lastUpdatedBy: user4._id,
+            lastUpdatedAt: new Date("2025-03-01"),
+            comments: []
+        },
+        {
+            itemId: "item_012",
+            name: "Лопата",
+            quantity: 1,
+            unit: "шт",
+            category: "Инструменты",
+            status: 0,
+            addedBy: user1._id,
+            addedAt: new Date("2025-03-02"),
+            lastUpdatedBy: user1._id,
+            lastUpdatedAt: new Date("2025-03-02"),
+            comments: [
+                {
+                    commentId: "comm_006",
+                    text: "Штыковая, не совковая",
+                    authorId: user4._id,
+                    createdAt: new Date("2025-03-02")
+                }
+            ]
+        }
+    ]
+};
