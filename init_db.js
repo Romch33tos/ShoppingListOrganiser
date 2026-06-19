@@ -159,3 +159,46 @@ var list2 = {
         }
     ]
 };
+
+var list3 = {
+    _id: ObjectId(),
+    name: "Хозяйственные товары",
+    description: "Для дома",
+    createdBy: user3._id,
+    createdAt: new Date("2025-02-25"),
+    items: [
+        {
+            itemId: "item_009",
+            name: "Стиральный порошок",
+            quantity: 1,
+            unit: "уп",
+            category: "Бытовая химия",
+            status: 0,
+            addedBy: user3._id,
+            addedAt: new Date("2025-02-25"),
+            lastUpdatedBy: user3._id,
+            lastUpdatedAt: new Date("2025-02-25"),
+            comments: []
+        },
+        {
+            itemId: "item_010",
+            name: "Губки для посуды",
+            quantity: 5,
+            unit: "шт",
+            category: "Бытовая химия",
+            status: 0,
+            addedBy: user5._id,
+            addedAt: new Date("2025-02-26"),
+            lastUpdatedBy: user5._id,
+            lastUpdatedAt: new Date("2025-02-26"),
+            comments: [
+                {
+                    commentId: "comm_005",
+                    text: "С абразивным слоем",
+                    authorId: user3._id,
+                    createdAt: new Date("2025-02-26")
+                }
+            ]
+        }
+    ]
+};
