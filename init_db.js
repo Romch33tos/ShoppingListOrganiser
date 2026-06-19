@@ -304,3 +304,19 @@ var list5 = {
 
 db.shoppingLists.insertMany([list1, list2, list3, list4, list5]);
 print("Списки добавлены: " + db.shoppingLists.count());
+
+db.permissions.insertMany([
+    { _id: ObjectId(), listId: list1._id, userId: user2._id, role: "commenter", invitedAt: new Date("2025-02-16") },
+    { _id: ObjectId(), listId: list1._id, userId: user3._id, role: "viewer", invitedAt: new Date("2025-02-17") },
+    { _id: ObjectId(), listId: list2._id, userId: user1._id, role: "editor", invitedAt: new Date("2025-02-21") },
+    { _id: ObjectId(), listId: list2._id, userId: user3._id, role: "commenter", invitedAt: new Date("2025-02-21") },
+    { _id: ObjectId(), listId: list2._id, userId: user4._id, role: "viewer", invitedAt: new Date("2025-02-22") },
+    { _id: ObjectId(), listId: list3._id, userId: user5._id, role: "editor", invitedAt: new Date("2025-02-26") },
+    { _id: ObjectId(), listId: list3._id, userId: user4._id, role: "viewer", invitedAt: new Date("2025-02-27") },
+    { _id: ObjectId(), listId: list4._id, userId: user1._id, role: "editor", invitedAt: new Date("2025-03-02") },
+    { _id: ObjectId(), listId: list4._id, userId: user2._id, role: "commenter", invitedAt: new Date("2025-03-02") },
+    { _id: ObjectId(), listId: list5._id, userId: user2._id, role: "editor", invitedAt: new Date("2025-03-06") },
+    { _id: ObjectId(), listId: list5._id, userId: user3._id, role: "viewer", invitedAt: new Date("2025-03-06") }
+]);
+
+print("Права доступа добавлены: " + db.permissions.count());
