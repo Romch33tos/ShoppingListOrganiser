@@ -320,3 +320,11 @@ db.permissions.insertMany([
 ]);
 
 print("Права доступа добавлены: " + db.permissions.count());
+
+db.users.createIndex({ email: 1 }, { unique: true });
+db.shoppingLists.createIndex({ "items.status": 1 });
+db.permissions.createIndex({ userId: 1, listId: 1 }, { unique: true });
+db.permissions.createIndex({ listId: 1 });
+db.permissions.createIndex({ userId: 1 });
+
+print("Индексы созданы");
