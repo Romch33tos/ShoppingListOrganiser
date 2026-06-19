@@ -301,3 +301,6 @@ var list5 = {
         }
     ]
 };
+
+db.shoppingLists.insertMany([list1, list2, list3, list4, list5]);
+print("Списки добавлены: " + db.shoppingLists.count());
