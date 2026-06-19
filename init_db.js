@@ -245,3 +245,59 @@ var list4 = {
         }
     ]
 };
+
+var list5 = {
+    _id: ObjectId(),
+    name: "Офис",
+    description: "Канцелярия",
+    createdBy: user5._id,
+    createdAt: new Date("2025-03-05"),
+    items: [
+        {
+            itemId: "item_013",
+            name: "Бумага А4",
+            quantity: 2,
+            unit: "пачки",
+            category: "Канцелярия",
+            status: 0,
+            addedBy: user5._id,
+            addedAt: new Date("2025-03-05"),
+            lastUpdatedBy: user5._id,
+            lastUpdatedAt: new Date("2025-03-05"),
+            comments: []
+        },
+        {
+            itemId: "item_014",
+            name: "Ручки синие",
+            quantity: 10,
+            unit: "шт",
+            category: "Канцелярия",
+            status: 1,
+            addedBy: user2._id,
+            addedAt: new Date("2025-03-06"),
+            lastUpdatedBy: user2._id,
+            lastUpdatedAt: new Date("2025-03-07"),
+            comments: [
+                {
+                    commentId: "comm_007",
+                    text: "Гелевые",
+                    authorId: user5._id,
+                    createdAt: new Date("2025-03-06")
+                }
+            ]
+        },
+        {
+            itemId: "item_015",
+            name: "Степлер",
+            quantity: 1,
+            unit: "шт",
+            category: "Канцелярия",
+            status: 0,
+            addedBy: user5._id,
+            addedAt: new Date("2025-03-05"),
+            lastUpdatedBy: user5._id,
+            lastUpdatedAt: new Date("2025-03-05"),
+            comments: []
+        }
+    ]
+};
