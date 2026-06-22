@@ -85,3 +85,148 @@ app.post('/list/:listId/delete', requireAuth, async (req, res) => {
 
   res.redirect('/');
 });
+
+app.post('/list/:listId/item/add', requireAuth, async (req, res) => {
+  const { listId } = req.params;
+  const { name, quantity, unit, category, comment } = req.body;
+  const userId = req.session.userId;
+
+  if (!ObjectId.isValid(listId)) {
+    return res.status(400).send('Неверный идентификатор списка');
+  }
+
+  const canEdit = await checkAccess(listId, userId, 'editor');
+  if (!canEdit) {
+    return res.status(403).send('Доступ запрещён');
+  }
+
+  const nameError = validateString(name, 'Название товара', 1, 100);
+  if (nameError) {
+    const list = await shoppingListsCollection.findOne({ _id: new ObjectId(listId) });
+    return res.render('list', { 
+      list, items: [], userRole: 'editor', userId, members: [], owner: '', listId, 
+      error: nameError, success: null 
+    });
+  }
+
+  const quantityError = validateQuantity(quantity);
+  if (quantityError) {
+    const list = await shoppingListsCollection.findOne({ _id: new ObjectId(listId) });
+    return res.render('list', { 
+      list, items: [], userRole: 'editor', userId, members: [], owner: '', listId, 
+      error: quantityError, success: null 
+    });
+  }
+
+  const commentError = validateComment(comment);
+  if (commentError) {
+    const list = await shoppingListsCollection.findOne({ _id: new ObjectId(listId) });
+    return res.render('list', { 
+      list, items: [], userRole: 'editor', userId, members: [], owner: '', listId, 
+      error: commentError, success: null 
+    });
+  }
+
+  const itemId = `item_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+  const quantityValue = quantity && quantity !== '' ? parseFloat(quantity) : 1;
+  
+  const newItem = {
+    itemId,
+    name: name.trim(),
+    quantity: quantityValue,
+    unit: unit || 'шт',
+    category: category || 'Другое',
+    status: 0,
+    addedBy: new ObjectId(userId),
+    addedAt: new Date(),
+    lastUpdatedBy: new ObjectId(userId),
+    lastUpdatedAt: new Date(),
+    comments: []
+  };
+
+  if (comment && comment.trim()) {
+    newItem.comments.push({
+      commentId: `comm_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      text: comment.trim().substring(0, 500),
+      authorId: new ObjectId(userId),
+      createdAt: new Date()
+    });
+  }
+
+  await shoppingListsCollection.updateOne(
+    { _id: new ObjectId(listId) },
+    { $push: { items: newItem } }
+  );
+
+  res.redirect(`/list/${listId}`);
+});
+
+app.post('/list/:listId/item/:itemId/edit', requireAuth, async (req, res) => {
+  const { listId, itemId } = req.params;
+  const { status, quantity } = req.body;
+  const userId = req.session.userId;
+
+  if (!ObjectId.isValid(listId)) {
+    return res.status(400).send('Неверный идентификатор списка');
+  }
+
+  const canEdit = await checkAccess(listId, userId, 'editor');
+  if (!canEdit) {
+    const canView = await checkAccess(listId, userId, 'viewer');
+    if (!canView || status === undefined) {
+      return res.status(403).send('Доступ запрещён');
+    }
+  }
+
+  const list = await shoppingListsCollection.findOne({ _id: new ObjectId(listId) });
+  const itemIndex = list.items.findIndex(item => item.itemId === itemId);
+
+  if (itemIndex === -1) return res.status(404).send('Товар не найден');
+
+  const updateFields = {
+    'items.$.lastUpdatedBy': new ObjectId(userId),
+    'items.$.lastUpdatedAt': new Date()
+  };
+
+  if (status !== undefined) {
+    const newStatus = parseInt(status);
+    if (newStatus === 0 || newStatus === 1) {
+      updateFields['items.$.status'] = newStatus;
+    }
+  }
+
+  if (quantity !== undefined && (canEdit || await checkAccess(listId, userId, 'editor'))) {
+    const quantityError = validateQuantity(quantity);
+    if (!quantityError) {
+      updateFields['items.$.quantity'] = parseFloat(quantity);
+    }
+  }
+
+  await shoppingListsCollection.updateOne(
+    { _id: new ObjectId(listId), 'items.itemId': itemId },
+    { $set: updateFields }
+  );
+
+  res.redirect(`/list/${listId}`);
+});
+
+app.post('/list/:listId/item/:itemId/delete', requireAuth, async (req, res) => {
+  const { listId, itemId } = req.params;
+  const userId = req.session.userId;
+
+  if (!ObjectId.isValid(listId)) {
+    return res.status(400).send('Неверный идентификатор списка');
+  }
+
+  const canEdit = await checkAccess(listId, userId, 'editor');
+  if (!canEdit) {
+    return res.status(403).send('Доступ запрещён');
+  }
+
+  await shoppingListsCollection.updateOne(
+    { _id: new ObjectId(listId) },
+    { $pull: { items: { itemId: itemId } } }
+  );
+
+  res.redirect(`/list/${listId}`);
+});
