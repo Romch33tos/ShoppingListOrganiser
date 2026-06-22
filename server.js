@@ -1,38 +1,44 @@
-const express = require('express');
-const session = require('express-session');
-const { MongoClient, ObjectId } = require('mongodb');
-const path = require('path');
+function requireAuth(req, res, next) {
+  if (!req.session.userId) {
+    return res.redirect('/login');
+  }
+  next();
+}
 
-const app = express();
-const PORT = 3000;
+async function checkAccess(listId, userId, requiredRole = null) {
+  const list = await shoppingListsCollection.findOne({ _id: new ObjectId(listId) });
+  if (!list) return false;
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(express.static('public'));
-app.use(session({
-  secret: 'shopping-list-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }
-}));
+  if (list.createdBy.toString() === userId.toString()) return true;
 
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+  const permission = await permissionsCollection.findOne({
+    listId: new ObjectId(listId),
+    userId: new ObjectId(userId)
+  });
 
-const MONGODB_URI = 'mongodb://localhost:27017';
-const DB_NAME = 'ShoppingListOrganizer';
+  if (!permission) return false;
 
-let db;
-let usersCollection;
-let shoppingListsCollection;
-let permissionsCollection;
+  if (!requiredRole) return true;
 
-async function connectDB() {
-  const client = new MongoClient(MONGODB_URI);
-  await client.connect();
-  db = client.db(DB_NAME);
-  usersCollection = db.collection('users');
-  shoppingListsCollection = db.collection('shoppingLists');
-  permissionsCollection = db.collection('permissions');
-  console.log('Connected to MongoDB');
+  const roleHierarchy = { owner: 3, editor: 2, commenter: 1, viewer: 0 };
+  const userRoleLevel = roleHierarchy[permission.role];
+  const requiredLevel = roleHierarchy[requiredRole];
+
+  return userRoleLevel >= requiredLevel;
+}
+
+async function getUserRole(listId, userId) {
+  const list = await shoppingListsCollection.findOne({ _id: new ObjectId(listId) });
+  if (list && list.createdBy.toString() === userId.toString()) return 'owner';
+
+  const permission = await permissionsCollection.findOne({
+    listId: new ObjectId(listId),
+    userId: new ObjectId(userId)
+  });
+  return permission ? permission.role : null;
+}
+
+async function getUserNameById(userId) {
+  const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+  return user ? user.name : 'Неизвестный';
 }
