@@ -37,3 +37,35 @@ app.post('/register', async (req, res) => {
   req.session.userName = user.name;
   res.redirect('/');
 });
+
+app.get('/login', (req, res) => {
+  if (req.session.userId) return res.redirect('/');
+  res.render('login', { error: null, formData: {} });
+});
+
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  const emailError = validateEmail(email);
+  if (emailError) {
+    return res.render('login', { error: emailError, formData: { email } });
+  }
+
+  if (!password || password.length < 1) {
+    return res.render('login', { error: 'Введите пароль', formData: { email } });
+  }
+
+  const user = await usersCollection.findOne({ email: email.trim() });
+  if (!user || user.passwordHash !== `hash_${password}`) {
+    return res.render('login', { error: 'Неверный email или пароль', formData: { email } });
+  }
+
+  req.session.userId = user._id.toString();
+  req.session.userName = user.name;
+  res.redirect('/');
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy();
+  res.redirect('/login');
+});
