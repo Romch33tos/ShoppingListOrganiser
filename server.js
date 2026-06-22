@@ -230,3 +230,72 @@ app.post('/list/:listId/item/:itemId/delete', requireAuth, async (req, res) => {
 
   res.redirect(`/list/${listId}`);
 });
+
+app.post('/list/:listId/item/:itemId/comment/add', requireAuth, async (req, res) => {
+  const { listId, itemId } = req.params;
+  const { commentText } = req.body;
+  const userId = req.session.userId;
+
+  if (!ObjectId.isValid(listId)) {
+    return res.status(400).send('Неверный идентификатор списка');
+  }
+
+  const canComment = await checkAccess(listId, userId, 'commenter');
+  if (!canComment) {
+    return res.status(403).send('Доступ запрещён');
+  }
+
+  const commentError = validateComment(commentText);
+  if (commentError) {
+    const list = await shoppingListsCollection.findOne({ _id: new ObjectId(listId) });
+    const userRole = await getUserRole(listId, userId);
+    const itemsWithAuthors = await Promise.all((list.items || []).map(async (item) => ({
+      ...item,
+      addedByName: await getUserNameById(item.addedBy),
+      comments: await Promise.all((item.comments || []).map(async (c) => ({
+        ...c,
+        authorName: await getUserNameById(c.authorId)
+      })))
+    })));
+    const permissionsList = await permissionsCollection.find({ listId: new ObjectId(listId) }).toArray();
+    const membersWithNames = await Promise.all(permissionsList.map(async (perm) => {
+      const user = await usersCollection.findOne({ _id: perm.userId });
+      return { userId: perm.userId, userName: user ? user.name : 'Неизвестный', role: perm.role };
+    }));
+    const owner = await usersCollection.findOne({ _id: list.createdBy });
+    
+    return res.render('list', {
+      list, items: itemsWithAuthors, userRole, userId: req.session.userId,
+      members: membersWithNames, owner: owner ? owner.name : 'Неизвестный', listId,
+      error: commentError, success: null
+    });
+  }
+
+  if (!commentText || commentText.trim() === '') {
+    return res.redirect(`/list/${listId}`);
+  }
+
+  const newComment = {
+    commentId: `comm_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+    text: commentText.trim().substring(0, 500),
+    authorId: new ObjectId(userId),
+    createdAt: new Date()
+  };
+
+  await shoppingListsCollection.updateOne(
+    { _id: new ObjectId(listId), 'items.itemId': itemId },
+    { $push: { 'items.$.comments': newComment } }
+  );
+
+  await shoppingListsCollection.updateOne(
+    { _id: new ObjectId(listId), 'items.itemId': itemId },
+    {
+      $set: {
+        'items.$.lastUpdatedBy': new ObjectId(userId),
+        'items.$.lastUpdatedAt': new Date()
+      }
+    }
+  );
+
+  res.redirect(`/list/${listId}`);
+});
