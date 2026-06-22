@@ -299,3 +299,77 @@ app.post('/list/:listId/item/:itemId/comment/add', requireAuth, async (req, res)
 
   res.redirect(`/list/${listId}`);
 });
+
+app.get('/list/:listId/invite', requireAuth, async (req, res) => {
+  const { listId } = req.params;
+  const userId = req.session.userId;
+
+  if (!ObjectId.isValid(listId)) {
+    return res.status(400).send('Неверный идентификатор списка');
+  }
+
+  const canEdit = await checkAccess(listId, userId, 'editor');
+  if (!canEdit) {
+    return res.status(403).send('Доступ запрещён');
+  }
+
+  res.render('invite', { listId, error: null });
+});
+
+app.post('/list/:listId/invite', requireAuth, async (req, res) => {
+  const { listId } = req.params;
+  const { email, role } = req.body;
+  const userId = req.session.userId;
+
+  if (!ObjectId.isValid(listId)) {
+    return res.status(400).send('Неверный идентификатор списка');
+  }
+
+  const canEdit = await checkAccess(listId, userId, 'editor');
+  if (!canEdit) {
+    return res.status(403).send('Доступ запрещён');
+  }
+
+  const emailError = validateEmail(email);
+  if (emailError) {
+    return res.render('invite', { listId, error: emailError });
+  }
+
+  const userToInvite = await usersCollection.findOne({ email: email.trim() });
+  if (!userToInvite) {
+    return res.render('invite', { listId, error: 'Пользователь с таким email не найден' });
+  }
+
+  if (userToInvite._id.toString() === userId) {
+    return res.render('invite', { listId, error: 'Вы не можете пригласить самого себя' });
+  }
+
+  const list = await shoppingListsCollection.findOne({ _id: new ObjectId(listId) });
+  if (list.createdBy.toString() === userToInvite._id.toString()) {
+    return res.render('invite', { listId, error: 'Пользователь уже является владельцем этого списка' });
+  }
+
+  const validRoles = ['viewer', 'commenter', 'editor'];
+  const finalRole = validRoles.includes(role) ? role : 'viewer';
+
+  const existingPermission = await permissionsCollection.findOne({
+    listId: new ObjectId(listId),
+    userId: userToInvite._id
+  });
+
+  if (existingPermission) {
+    await permissionsCollection.updateOne(
+      { _id: existingPermission._id },
+      { $set: { role: finalRole, invitedAt: new Date() } }
+    );
+  } else {
+    await permissionsCollection.insertOne({
+      listId: new ObjectId(listId),
+      userId: userToInvite._id,
+      role: finalRole,
+      invitedAt: new Date()
+    });
+  }
+
+  res.redirect(`/list/${listId}`);
+});
