@@ -29,7 +29,7 @@
 ## Структура проекта
 
 ```text
-shopping-list-organizer/
+ShoppingListOrganiser/
 ├── server.js              # Точка входа, маршруты и бизнес-логика
 ├── init_db.js             # Скрипт инициализации БД тестовыми данными
 ├── package.json           # Конфигурация Node.js и зависимости
@@ -43,3 +43,41 @@ shopping-list-organizer/
     ├── login.ejs          # Страница входа
     └── register.ejs       # Страница регистрации
 ```
+
+## Установка и запуск
+
+### Требования
+
+Перед началом убедитесь, что установлены:
+* Node.js (версия 14 или выше)
+* npm (менеджер пакетов)
+* MongoDB Community Server (запущен на порту 27017)
+
+### Шаг 1: Клонирование репозитория
+
+```bash
+git clone https://github.com/Romch33tos/ShoppingListOrganiser.git
+cd shopping-list-organizer
+```
+
+### Шаг 2: Установка зависимостей
+
+```bash
+npm install
+```
+
+### Шаг 3: Настройка базы данных
+
+Запустите скрипт инициализации для создания тестовых данных:
+
+```bash
+node init_db.js
+```
+
+### Шаг 4: Запуск сервера
+
+```bash
+node server.js
+```
+
+После запуска сервер будет доступен по адресу: [http://localhost:3000](http://localhost:3000)
