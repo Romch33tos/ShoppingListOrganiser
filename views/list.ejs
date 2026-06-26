@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= list.name %> - Организатор покупок</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f7fb; }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .header h1 { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logout-link { color: #ef4444; text-decoration: none; font-size: 14px; }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 16px; }
+        .back-link { display: inline-block; margin-bottom: 16px; color: #667eea; text-decoration: none; font-size: 14px; }
+        
+        .list-info {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .list-title { font-size: 24px; font-weight: 700; color: #1a202c; margin-bottom: 8px; }
+        .list-meta { color: #718096; font-size: 13px; display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; }
+        .role-chip { background: #e9d8fd; color: #6b46c0; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        
+        .add-item-form {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #2d3748; }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            align-items: end;
+        }
+        .form-field { display: flex; flex-direction: column; }
+        .form-field label { font-size: 11px; font-weight: 600; color: #718096; margin-bottom: 4px; text-transform: uppercase; }
+        .form-field input, .form-field select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .form-field input:focus, .form-field select:focus { border-color: #667eea; outline: none; }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            height: 38px;
+        }
+        
+        .items-table {
+            background: white;
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th {
+            text-align: left;
+            padding: 12px;
+            background: #f8fafc;
+            color: #4a5568;
+            font-size: 12px;
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        td { padding: 12px; border-bottom: 1px solid #edf2f7; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        
+        .status-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: #48bb78; }
+        .item-name { font-weight: 600; color: #2d3748; font-size: 14px; }
+        .category-badge { background: #edf2f7; padding: 2px 8px; border-radius: 12px; font-size: 11px; color: #4a5568; display: inline-block; margin-top: 4px; }
+        
+        .quantity-edit { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .quantity-edit input { width: 65px; padding: 6px 8px; border: 1px solid #e2e8f0; border-radius: 6px; text-align: center; }
+        .quantity-unit { font-size: 12px; color: #718096; }
+        
+        .btn-delete {
+            background: #fee;
+            color: #ef4444;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-delete:hover { background: #fec; }
+        
+        .comment-section { margin-top: 8px; padding-top: 8px; border-top: 1px solid #edf2f7; }
+        .comment { background: #f8fafc; padding: 6px 10px; border-radius: 8px; margin-bottom: 6px; font-size: 12px; }
+        .comment-author { font-weight: 600; color: #4a5568; }
+        .comment-text { color: #2d3748; margin: 2px 0; }
+        .comment-date { font-size: 10px; color: #a0aec0; }
+        .comment-form { display: flex; gap: 6px; margin-top: 8px; }
+        .comment-form input { flex: 1; padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12px; }
+        .btn-small { background: #48bb78; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 11px; cursor: pointer; }
+        
+        .invite-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .invite-form { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+        .invite-form input { flex: 2; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .invite-form select { flex: 1; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .members-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .member-card { background: #f8fafc; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .member-role { background: #e2e8f0; padding: 2px 6px; border-radius: 12px; font-size: 10px; margin-left: 6px; }
+        
+        .empty-row { text-align: center; padding: 40px !important; color: #a0aec0; }
+        .error-msg { background: #fee; color: #c53030; padding: 10px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
+        
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            td { padding: 8px; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 Организатор покупок</h1>
+        <a href="/logout" class="logout-link">Выйти</a>
+    </div>
+    <div class="container">
+        <a href="/" class="back-link">← Назад к спискам</a>
+        
+        <% if (error) { %>
+            <div class="error-msg"><%= error %></div>
+        <% } %>
+        
+        <div class="list-info">
+            <div class="list-title"><%= list.name %></div>
+            <% if (list.description) { %>
+                <div class="list-meta"><%= list.description %></div>
+            <% } %>
+            <div class="list-meta">
+                <span>👑 Владелец: <%= owner %></span>
+                <span class="role-chip">Ваша роль: 
+                    <% if (userRole === 'owner') { %>Владелец<% %>
+                    <% } else if (userRole === 'editor') { %>Редактор<% %>
+                    <% } else if (userRole === 'commenter') { %>Комментатор<% %>
+                    <% } else { %>Просмотр<% } %>
+                </span>
+            </div>
+        </div>
+
+        <% if (userRole === 'owner' || userRole === 'editor') { %>
+        <div class="add-item-form">
+            <div class="section-title">➕ Добавить товар</div>
+            <form action="/list/<%= listId %>/item/add" method="POST" class="form-grid">
+                <div class="form-field">
+                    <label>Название</label>
+                    <input type="text" name="name" placeholder="Молоко" required>
+                </div>
+                <div class="form-field">
+                    <label>Количество</label>
+                    <input type="number" step="any" name="quantity" value="1">
+                </div>
+                <div class="form-field">
+                    <label>Единица</label>
+                    <select name="unit">
+                        <option>шт</option><option>кг</option><option>л</option>
+                        <option>г</option><option>уп</option><option>пачки</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Категория</label>
+                    <select name="category">
+                        <option>Молочные продукты</option><option>Овощи и фрукты</option>
+                        <option>Хлебобулочные</option><option>Напитки</option>
+                        <option>Мясо и рыба</option><option>Бытовая химия</option>
+                        <option>Канцелярия</option><option>Другое</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Комментарий</label>
+                    <input type="text" name="comment" placeholder="Необязательно...">
+                </div>
+                <button type="submit" class="btn-primary">Добавить</button>
+            </form>
+        </div>
+        <% } %>
+
+        <div class="items-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px">Готово</th>
+                        <th>Товар</th>
+                        <th style="width: 130px">Кол-во</th>
+                        <th style="width: 140px">Добавил</th>
+                        <th>Комментарии</th>
+                        <th style="width: 80px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% items.forEach(item => { %>
+                        <tr style="<%= item.status === 1 ? 'background: #f0fff4;' : '' %>">
+                            <td>
+                                <form action="/list/<%= listId %>/item/<%= item.itemId %>/edit" method="POST">
+                                    <input type="hidden" name="status" value="<%= item.status === 0 ? 1 : 0 %>">
+                                    <input type="checkbox" class="status-checkbox" <%= item.status === 1 ? 'checked' : '' %> onchange="this.form.submit()">
+                                </form>
+                            </td>
+                            <td>
+                                <div class="item-name"><%= item.name %></div>
+                                <span class="category-badge"><%= item.category %></span>
+                            </td>
+                            <td>
+                                <% if (userRole === 'owner' || userRole === 'editor') { %>
+                                    <form action="/list/<%= listId %>/item/<%= item.itemId %>/edit" method="POST" class="quantity-edit">
+                                        <input type="number" step="any" name="quantity" value="<%= item.quantity %>" onchange="this.form.submit()">
+                                        <span class="quantity-unit"><%= item.unit %></span>
+                                    </form>
+                                <% } else { %>
+                                    <span><%= item.quantity %> <%= item.unit %></span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <div><%= item.addedByName %></div>
+                                <div style="font-size: 10px; color: #a0aec0;"><%= new Date(item.addedAt).toLocaleDateString('ru-RU') %></div>
+                            </td>
+                            <td>
+                                <div class="comment-section">
+                                    <% if (item.comments && item.comments.length > 0) { %>
+                                        <% item.comments.forEach(comment => { %>
+                                            <div class="comment">
+                                                <div class="comment-author"><%= comment.authorName %></div>
+                                                <div class="comment-text"><%= comment.text %></div>
+                                                <div class="comment-date"><%= new Date(comment.createdAt).toLocaleString('ru-RU') %></div>
+                                            </div>
+                                        <% }) %>
+                                    <% } %>
+                                    <% if (userRole === 'owner' || userRole === 'editor' || userRole === 'commenter') { %>
+                                        <form action="/list/<%= listId %>/item/<%= item.itemId %>/comment/add" method="POST" class="comment-form">
+                                            <input type="text" name="commentText" placeholder="Написать комментарий..." required>
+                                            <button type="submit" class="btn-small">Отпр.</button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </td>
+                            <td>
+                                <% if (userRole === 'owner' || userRole === 'editor') { %>
+                                    <form action="/list/<%= listId %>/item/<%= item.itemId %>/delete" method="POST" onsubmit="return confirm('Удалить товар?')">
+                                        <button type="submit" class="btn-delete">🗑️ Удалить</button>
+                                    </form>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                    <% if (items.length === 0) { %>
+                        <tr><td colspan="6" class="empty-row">✨ Список пуст. Добавьте первый товар!</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <% if (userRole === 'owner' || userRole === 'editor') { %>
+        <div class="invite-section">
+            <div class="section-title">👥 Пригласить участников</div>
+            <form action="/list/<%= listId %>/invite" method="POST" class="invite-form">
+                <input type="email" name="email" placeholder="Email пользователя" required>
+                <select name="role">
+                    <option value="viewer">👁️ Просмотр</option>
+                    <option value="commenter">💬 Комментатор</option>
+                    <option value="editor">✏️ Редактор</option>
+                </select>
+                <button type="submit" class="btn-primary">Пригласить</button>
+            </form>
+            <div class="members-list">
+                <div class="member-card">👑 <strong><%= owner %></strong> <span class="member-role">Владелец</span></div>
+                <% members.forEach(member => { %>
+                    <div class="member-card">👤 <%= member.userName %> <span class="member-role"><%= member.role === 'editor' ? 'Редактор' : (member.role === 'commenter' ? 'Комментатор' : 'Просмотр') %></span></div>
+                <% }) %>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</body>
+</html>
