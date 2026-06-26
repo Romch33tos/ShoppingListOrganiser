@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои списки - Организатор покупок</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f7fb; }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .header h1 { font-size: 20px; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logout-link { color: #ef4444; text-decoration: none; font-size: 14px; }
+        
+        .container { max-width: 1280px; margin: 0 auto; padding: 20px; }
+        .create-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .create-btn:hover { transform: translateY(-2px); }
+        
+        .lists-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 16px; }
+        
+        .list-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .list-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        
+        .list-content { flex: 1; text-decoration: none; color: inherit; display: block; }
+        .list-name { font-size: 18px; font-weight: 700; color: #1a202c; margin-bottom: 6px; }
+        .list-description { color: #718096; font-size: 13px; margin-bottom: 10px; line-height: 1.4; }
+        .list-stats { display: inline-flex; align-items: center; gap: 6px; background: #edf2f7; padding: 4px 10px; border-radius: 20px; font-size: 12px; color: #2d3748; }
+        .role-badge { display: inline-block; background: #e9d8fd; color: #6b46c0; padding: 2px 8px; border-radius: 20px; font-size: 11px; margin-left: 8px; }
+        
+        .delete-list-btn {
+            background: #fee;
+            color: #ef4444;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .delete-list-btn:hover { background: #fec; transform: scale(1.02); }
+        
+        .empty { text-align: center; padding: 60px 20px; background: white; border-radius: 12px; border: 2px dashed #e2e8f0; }
+        .empty p { color: #718096; margin-bottom: 8px; }
+        
+        @media (max-width: 640px) {
+            .container { padding: 12px; }
+            .lists-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 Организатор покупок</h1>
+        <div class="user-info" style="display: flex; align-items: center; gap: 16px;">
+            <span style="font-size: 14px;">👋 Здравствуйте, <%= userName %>!</span>
+            <a href="/logout" class="logout-link">Выйти</a>
+        </div>
+    </div>
+    <div class="container">
+        <a href="/list/create" class="create-btn">+ Создать новый список</a>
+        
+        <% if (lists.length === 0) { %>
+            <div class="empty">
+                <p>📭 У вас пока нет списков покупок</p>
+                <p>Нажмите «Создать новый список», чтобы начать</p>
+            </div>
+        <% } else { %>
+            <div class="lists-grid">
+                <% lists.forEach(list => { %>
+                    <div class="list-card">
+                        <a href="/list/<%= list._id %>" class="list-content">
+                            <div class="list-name"><%= list.name %></div>
+                            <% if (list.description) { %>
+                                <div class="list-description"><%= list.description %></div>
+                            <% } %>
+                            <div>
+                                <span class="list-stats">📝 <%= list.notPurchasedCount %> некупленных</span>
+                                <span class="role-badge">
+                                    <% if (list.userRole === 'owner') { %>Владелец<% %>
+                                    <% } else if (list.userRole === 'editor') { %>Редактор<% %>
+                                    <% } else if (list.userRole === 'commenter') { %>Комментатор<% %>
+                                    <% } else { %>Просмотр<% } %>
+                                </span>
+                            </div>
+                        </a>
+                        <% if (list.userRole === 'owner') { %>
+                            <form action="/list/<%= list._id %>/delete" method="POST" onsubmit="return confirm('Удалить список «<%= list.name %>»? Все товары и комментарии будут потеряны.')">
+                                <button type="submit" class="delete-list-btn">🗑️ Удалить</button>
+                            </form>
+                        <% } %>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>
